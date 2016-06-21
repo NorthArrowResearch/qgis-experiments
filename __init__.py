@@ -31,5 +31,5 @@ def classFactory(iface):  # pylint: disable=invalid-name
     :type iface: QgsInterface
     """
     #
-    from .demo_plugin import NARDemoPlugin
+    from demo_plugin import NARDemoPlugin
     return NARDemoPlugin(iface)

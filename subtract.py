@@ -27,6 +27,7 @@ from PyQt4 import QtGui, uic
 from PyQt4.QtCore import *
 from qgis.core import QgsMapLayer, QgsRasterLayer, QgsMapLayerRegistry,QgsProject
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
+from symbology import setRamp 
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -165,12 +166,12 @@ class SubtractWidget(QtGui.QDialog, FORM_CLASS):
         if not QgsMapLayerRegistry.instance().mapLayersByName(baseName):
             rOutput = QgsRasterLayer(fileName, baseName)
             QgsMapLayerRegistry.instance().addMapLayer(rOutput, False)
+            setRamp(rOutput, self.iface)
             node_layer1 = node_subgroup1.addLayer(rOutput)
 
         # if the layer already exists trigger a refresh
         else:
             rOutput = QgsMapLayerRegistry.instance().mapLayersByName(baseName)[0]
-            rOutput.setCacheImage( None )
             rOutput.triggerRepaint()
 
 

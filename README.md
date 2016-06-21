@@ -6,3 +6,4 @@
 * Dock widget
 * Subtract two rasters
 * Group rasters in tree view
+* Color Ramps

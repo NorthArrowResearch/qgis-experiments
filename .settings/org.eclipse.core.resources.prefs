@@ -1,4 +1,5 @@
 eclipse.preferences.version=1
+encoding/__init__.py=utf-8
 encoding/demo_plugin.py=utf-8
 encoding/demo_plugin_dockwidget.py=utf-8
 encoding/plugin_upload.py=utf-8
