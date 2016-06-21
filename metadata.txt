@@ -1,0 +1,39 @@
+# This file contains metadata for your plugin. Since 
+# version 2.0 of QGIS this is the proper way to supply 
+# information about a plugin. The old method of 
+# embedding metadata in __init__.py will 
+# is no longer supported since version 2.0.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=NAR Demo Plugin
+qgisMinimumVersion=2.0
+description=Demo Plugin
+version=0.1
+author=Matt
+email=matt@northarrowreseawrch.com
+
+about=this is a thing that does stuff.
+
+tracker=http://bitbucket.org
+repository=http://bitbucket.org
+# End of mandatory metadata
+
+# Recommended items:
+
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=thing,other
+
+homepage=http://northarrowresearch.com
+category=Raster
+icon=icon.png
+# experimental flag
+experimental=True
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
