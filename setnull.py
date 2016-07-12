@@ -26,20 +26,19 @@ import os
 from PyQt4 import QtGui, uic
 from PyQt4.QtCore import *
 from qgis.core import QgsMapLayer, QgsRasterLayer, QgsMapLayerRegistry,QgsProject
-from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
-from symbology import setRamp
+from classes import Raster
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'subtract.ui'))
+    os.path.dirname(__file__), 'setnull.ui'))
 
 
-class SubtractWidget(QtGui.QDialog, FORM_CLASS):
+class SetNullWidget(QtGui.QDialog, FORM_CLASS):
 
     closingPlugin = pyqtSignal()
 
     def __init__(self, iface, parent=None):
         """Constructor."""
-        super(SubtractWidget, self).__init__(parent)
+        super(SetNullWidget, self).__init__(parent)
         self.iface = iface
         # Set up the user interface from Designer.
         # After setupUI you can access any designer object by doing
@@ -51,14 +50,11 @@ class SubtractWidget(QtGui.QDialog, FORM_CLASS):
 
         # Set some initial setup
         last_index1 = self.cb_input1.currentText()
-        last_index2 = self.cb_input2.currentText()
         # populate the combo box with the polygon layers listed in the current legend
         self.set_input_layer_combobox(self.cb_input1, last_index1)
-        self.set_input_layer_combobox(self.cb_input2, last_index2)
 
         # Recalc the state of the UI buttons
         self.cb_input1.currentIndexChanged.connect(self.recalc_state)
-        self.cb_input2.currentIndexChanged.connect(self.recalc_state)
         self.lineEdit.textEdited.connect(self.recalc_state)
 
         self.buttonBox.clicked.connect(self.on_click)
@@ -108,70 +104,66 @@ class SubtractWidget(QtGui.QDialog, FORM_CLASS):
         if QtGui.QDialogButtonBox.Cancel == self.buttonBox.standardButton(button):
             self.done(QtGui.QDialog.Rejected)
         elif QtGui.QDialogButtonBox.Ok == self.buttonBox.standardButton(button):
-            self.raster_subtract()
+            self.raster_setNull()
             self.done(QtGui.QDialog.Accepted)
         elif QtGui.QDialogButtonBox.Help == self.buttonBox.standardButton(button):
             QtGui.QDesktopServices.openUrl(QUrl("http://slashdot.org"))
         elif QtGui.QDialogButtonBox.Reset == self.buttonBox.standardButton(button):
             self.cb_input1.setCurrentIndex(-1)
-            self.cb_input2.setCurrentIndex(-1)
             self.lineEdit.setText("")
 
     def recalc_state(self, event):
-        if self.cb_input1.currentIndex() > -1 and self.cb_input2.currentIndex() > -1 and len(self.lineEdit.text()) > 0:
+        if self.cb_input1.currentIndex() > -1 and len(self.lineEdit.text()) > 0:
             self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(True)
         else:
             self.buttonBox.button(QtGui.QDialogButtonBox.Ok).setEnabled(False)
 
-    def raster_subtract(self):
+    def raster_setNull(self):
         # if the layer does not exist it has to be created
-        rlayer1 = QgsMapLayerRegistry.instance().mapLayersByName( self.cb_input1.currentText() )[0]
-        rlayer2 = QgsMapLayerRegistry.instance().mapLayersByName( self.cb_input2.currentText() )[0]
+        rlayer1 = QgsMapLayerRegistry.instance().mapLayersByName(self.cb_input1.currentText())[0]
+        textEq = self.txtEq.text()
         fileName = self.lineEdit.text()
-        
-        entries = []
-        # Define band1
-        boh1 = QgsRasterCalculatorEntry()
-        boh1.ref = 'boh@1'
-        boh1.raster = rlayer1
-        boh1.bandNumber = 1
-        entries.append( boh1 )
-        
-        # Define band2
-        boh2 = QgsRasterCalculatorEntry()
-        boh2.ref = 'boh@2'
-        boh2.raster = rlayer2
-        boh2.bandNumber = 1
-        entries.append( boh2 )
-        
-        # Process calculation with input extent and resolution
-        calc = QgsRasterCalculator( 'boh@1 - boh@2', fileName, \
-                                    'GTiff', rlayer1.extent(), \
-                                    rlayer1.width(), rlayer1.height(), entries )
-        calc.processCalculation()
+
+        import parser
+        formula = "sin(x)*x**2"
+        code = parser.expr(formula).compile()
+
+        from math import sin
+        x = 10
+        print eval(code)
+
+        templateRaster = Raster(rlayer1.source())
+
+        width, height = templateRaster.band_array.shape  # or width = raster.width and height = raster.height()
+        print width
+        print height
+        # and
+        for row in range(0, width):
+            for col in range(0, height):
+                print row, col, templateRaster.band_array[row, col]
+
         
         # Load the file into the map
-        fileInfo = QFileInfo(fileName)
-        baseName = fileInfo.baseName()
-
-        root = QgsProject.instance().layerTreeRoot()
-        node_group1 = root.insertGroup(0, "Group 1")
-        node_subgroup1 = node_group1.addGroup("Sub-group 1")
+        # fileInfo = QFileInfo(fileName)
+        # baseName = fileInfo.baseName()
+        #
+        # root = QgsProject.instance().layerTreeRoot()
+        # node_group1 = root.insertGroup(0, "Group 1")
+        # node_subgroup1 = node_group1.addGroup("Sub-group 1")
 
         # Check out signals from nodes section
         # http://www.lutraconsulting.co.uk/blog/2014/07/25/qgis-layer-tree-api-part-2/
 
         # if the layer does not exist it has to be created
-        if not QgsMapLayerRegistry.instance().mapLayersByName(baseName):
-            rOutput = QgsRasterLayer(fileName, baseName)
-            QgsMapLayerRegistry.instance().addMapLayer(rOutput, False)
-            setRamp(rOutput, self.iface)
-            node_layer1 = node_subgroup1.addLayer(rOutput)
+        # if not QgsMapLayerRegistry.instance().mapLayersByName(baseName):
+        #     rOutput = QgsRasterLayer(fileName, baseName)
+        #     QgsMapLayerRegistry.instance().addMapLayer(rOutput, False)
+        #     node_layer1 = node_subgroup1.addLayer(rOutput)
 
         # if the layer already exists trigger a refresh
-        else:
-            rOutput = QgsMapLayerRegistry.instance().mapLayersByName(baseName)[0]
-            rOutput.triggerRepaint()
+        # else:
+        #     rOutput = QgsMapLayerRegistry.instance().mapLayersByName(baseName)[0]
+        #     rOutput.triggerRepaint()
 
 
     def closeEvent(self, event):

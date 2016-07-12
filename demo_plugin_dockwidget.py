@@ -25,7 +25,9 @@ import os
 
 from PyQt4 import QtGui, uic
 from PyQt4.QtCore import pyqtSignal
+from setnull import SetNullWidget
 from subtract import SubtractWidget
+from euclidDist import EuclidDistWidget
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'demo_plugin_dockwidget_base.ui'))
@@ -49,6 +51,13 @@ class NARDemoPluginDockWidget(QtGui.QDockWidget, FORM_CLASS):
         self.btnLoadXML.clicked.connect(self.file_browser)
         self.btnSubtract.clicked.connect(self.subtractEvent)
 
+        self.setNullDialog = SetNullWidget(iface)
+        self.btnSetNull.clicked.connect(self.setNullEvent)
+
+        self.euclidDistDialog = EuclidDistWidget(iface)
+        self.btnEuclidDist.clicked.connect(self.euclidDistEvent)
+
+
     def file_browser(self):
         filename = QtGui.QFileDialog.getSaveFileName(self, "Open file", "", "XML File (*.xml);;All files (*)")
         filename = os.path.splitext(str(filename))[0]+".xml"
@@ -59,6 +68,12 @@ class NARDemoPluginDockWidget(QtGui.QDockWidget, FORM_CLASS):
 
     def subtractEvent(self, event):
         self.subtractDialog.exec_()
+
+    def euclidDistEvent(self, event):
+        self.euclidDistDialog.exec_()
+
+    def setNullEvent(self, event):
+        self.setNullDialog.exec_()
 
     def closeEvent(self, event):
         self.closingPlugin.emit()

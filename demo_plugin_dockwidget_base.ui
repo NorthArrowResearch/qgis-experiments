@@ -23,6 +23,27 @@
      </widget>
     </item>
     <item>
+     <widget class="QPushButton" name="btnCon">
+      <property name="text">
+       <string>Con</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="btnEuclidDist">
+      <property name="text">
+       <string>Euclidean Distance</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="btnSetNull">
+      <property name="text">
+       <string>SetNull</string>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QTreeView" name="treeView"/>
     </item>
     <item>
